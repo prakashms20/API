@@ -2,7 +2,17 @@ const express = require('express');
 const{ Pool } = require('pg');
 const app = express();
 const port = 5000;
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+const productRoutes = require('./productRoutes');
+const useraccount = require('./useraccount');
+const login = require('./login');
+const order = require('./order');
+const payment = require('./payment');
 
+dotenv.config();
+
+const { authenticateJWT, jwtSecret } = require('./jwtAuthMiddleware');
 
 app.get('/', (req, res) => {
   res.send('Hello, World!!!!!');
@@ -14,15 +24,22 @@ app.listen(port, () => {
 
 
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'Carms@20',
-    port: 5432
-  });
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/product', productRoutes(pool)); 
+app.use('/useraccount', useraccount(pool)); 
+app.use('/login', login(pool)); 
+app.use('/ordertable', order(pool)); 
+app.use('/payment', payment(pool)); 
+
 
 // CORS middleware (for development, restrict in production)
 app.use((req, res, next) => {
@@ -31,25 +48,51 @@ app.use((req, res, next) => {
   next();
 });
 
-const productRoutes = require('./productRoutes');
-app.use('/product', productRoutes(pool)); 
+app.use('/category', authenticateJWT);
 
-const useraccount = require('./useraccount');
-app.use('/useraccount', useraccount(pool)); 
+app.get('/category', (req, res) => {
+  // This route is protected and can only be accessed with a valid token
+  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+});
 
-const login = require('./login');
-app.use('/login', login(pool)); 
+app.use('/product', authenticateJWT);
 
-const order = require('./order');
-app.use('/ordertable', order(pool)); 
+app.get('/product', (req, res) => {
+  // This route is protected and can only be accessed with a valid token
+  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+});
 
-const payment = require('./payment');
-app.use('/payment', payment(pool)); 
+app.use('/login', authenticateJWT);
+
+app.get('/login', (req, res) => {
+  // This route is protected and can only be accessed with a valid token
+  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+});
+
+app.use('/useraccount', authenticateJWT);
+
+app.get('/useraccount', (req, res) => {
+  // This route is protected and can only be accessed with a valid token
+  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+});
+
+app.use('/order', authenticateJWT);
+
+app.get('/order', (req, res) => {
+  // This route is protected and can only be accessed with a valid token
+  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+});
+
+app.use('/payment', authenticateJWT);
+
+app.get('/payment', (req, res) => {
+  // This route is protected and can only be accessed with a valid token
+  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+});
 
 
+// category
 
-
-// Create a new category
 app.post('/category', async (req, res) => {
     console.log(req.body);
     const { name, description } = req.body;
@@ -86,7 +129,7 @@ app.post('/category', async (req, res) => {
   });
   
   // Update a category by ID
-  app.put('/category/:id', async (req, res) => {
+  app.put('/category/:id',  async (req, res) => {
     const categoryId = req.params.id;
     const { name, description } = req.body;
     try {
@@ -104,7 +147,7 @@ app.post('/category', async (req, res) => {
   });
   
   // Delete a category by ID
-  app.delete('/category/:id', async (req, res) => {
+  app.delete('/category/:id',  async (req, res) => {
     const categoryId = req.params.id;
     try {
       const client = await pool.connect();
@@ -116,5 +159,26 @@ app.post('/category', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  
+
+  // Create and send a JWT token to the user upon successful registration or login
+  app.post('/generatetoken', (req, res) => {
+    const { username, password } = req.body;
+  
+    // Verify username and password (you may use your authentication logic here)
+  
+    if (username !== 'admin@gmail.com') {
+      res.json({ message: 'Invalid credentials' });
+    }
+  
+    // User is authenticated, create a JWT token
+    const token = jwt.sign({ username: username }, jwtSecret, {
+      expiresIn: '1h', // Token expiration time (e.g., 1 hour)
+    });
+  
+    // Send the token to the client
+    res.json({ token });
+  });
+
  
   
