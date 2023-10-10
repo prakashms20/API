@@ -1,27 +1,19 @@
 const express = require('express');
-const{ Pool } = require('pg');
+const { Pool } = require('pg');
 const app = express();
 const port = 5000;
-const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const productRoutes = require('./productRoutes');
 const useraccount = require('./useraccount');
 const login = require('./login');
 const order = require('./order');
 const payment = require('./payment');
+const swagger = require('./swagger');
+const categoryRoutes = require('./category');
+const { authenticateJWT } = require('./jwtAuthMiddleware');
+const { generateToken } = require('./jwtToken'); // Import the generateToken function
 
 dotenv.config();
-
-const { authenticateJWT, jwtSecret } = require('./jwtAuthMiddleware');
-
-app.get('/', (req, res) => {
-  res.send('Hello, World!!!!!');
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -34,12 +26,12 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/product', productRoutes(pool)); 
-app.use('/useraccount', useraccount(pool)); 
-app.use('/login', login(pool)); 
-app.use('/ordertable', order(pool)); 
-app.use('/payment', payment(pool)); 
-
+app.use('/product', productRoutes(pool,authenticateJWT));
+app.use('/useraccount', useraccount(pool,authenticateJWT));
+app.use('/login', login(pool,authenticateJWT));
+app.use('/ordertable', order(pool,authenticateJWT));
+app.use('/payment', payment(pool,authenticateJWT));
+app.use('/category', categoryRoutes(pool, authenticateJWT));
 
 // CORS middleware (for development, restrict in production)
 app.use((req, res, next) => {
@@ -48,137 +40,27 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/category', authenticateJWT);
+// Create and send a JWT token to the user upon successful registration or login
+app.post('/generatetoken', (req, res) => {
+  const { username, password } = req.body;
 
-app.get('/category', (req, res) => {
-  // This route is protected and can only be accessed with a valid token
-  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+  // Call the generateToken function
+  const tokenResponse = generateToken(username);
+
+  // Send the token or error message to the client
+  res.json(tokenResponse);
 });
 
-app.use('/product', authenticateJWT);
+// Your other protected routes go here...
 
-app.get('/product', (req, res) => {
-  // This route is protected and can only be accessed with a valid token
-  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+app.use('/api-docs', swagger.serveSwaggerUI, swagger.setupSwaggerUI);
+
+// Start the server
+
+app.get('/', (req, res) => {
+  res.send('Hello, World!! Welcome to my API');
 });
 
-app.use('/login', authenticateJWT);
-
-app.get('/login', (req, res) => {
-  // This route is protected and can only be accessed with a valid token
-  res.json({ message: 'Protected resource accessed successfully', user: req.user });
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
-
-app.use('/useraccount', authenticateJWT);
-
-app.get('/useraccount', (req, res) => {
-  // This route is protected and can only be accessed with a valid token
-  res.json({ message: 'Protected resource accessed successfully', user: req.user });
-});
-
-app.use('/order', authenticateJWT);
-
-app.get('/order', (req, res) => {
-  // This route is protected and can only be accessed with a valid token
-  res.json({ message: 'Protected resource accessed successfully', user: req.user });
-});
-
-app.use('/payment', authenticateJWT);
-
-app.get('/payment', (req, res) => {
-  // This route is protected and can only be accessed with a valid token
-  res.json({ message: 'Protected resource accessed successfully', user: req.user });
-});
-
-
-// category
-
-app.post('/category', async (req, res) => {
-    console.log(req.body);
-    const { name, description } = req.body;
-    try {
-      const client = await pool.connect();
-      const result = await client.query(
-        'INSERT INTO category (name, description) VALUES ($1, $2) RETURNING id',
-        [name, description]
-      );
-      const newCategoryId = result.rows[0].id;
-      client.release();
-      res.status(201).json({ id: newCategoryId, name, description });
-    } catch (err) {
-      console.error('Error creating category', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  }); 
-  
-  // Read all category
-  app.get('/category', async (req, res) => {
-    try {
-    
-      const client = await pool.connect();
-      const result = await client.query('SELECT * FROM category');
-      // res.status(500).json('tseew');
-
-      const category = result.rows;
-      client.release();
-      res.json(result.rows);
-    } catch (err) {
-      console.error('Error retrieving category', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
-  // Update a category by ID
-  app.put('/category/:id',  async (req, res) => {
-    const categoryId = req.params.id;
-    const { name, description } = req.body;
-    try {
-      const client = await pool.connect();
-      await client.query(
-        'UPDATE category SET name = $1, description = $2 WHERE id = $3',
-        [name, description, categoryId]
-      );
-      client.release();
-      res.json({ message: 'Category updated successfully' });
-    } catch (err) {
-      console.error('Error updating category', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
-  // Delete a category by ID
-  app.delete('/category/:id',  async (req, res) => {
-    const categoryId = req.params.id;
-    try {
-      const client = await pool.connect();
-      await client.query('DELETE FROM category WHERE id = $1', [categoryId]);
-      client.release();
-      res.json({ message: 'Category deleted successfully' });
-    } catch (err) {
-      console.error('Error deleting category', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
-
-  // Create and send a JWT token to the user upon successful registration or login
-  app.post('/generatetoken', (req, res) => {
-    const { username, password } = req.body;
-  
-    // Verify username and password (you may use your authentication logic here)
-  
-    if (username !== 'admin@gmail.com') {
-      res.json({ message: 'Invalid credentials' });
-    }
-  
-    // User is authenticated, create a JWT token
-    const token = jwt.sign({ username: username }, jwtSecret, {
-      expiresIn: '1h', // Token expiration time (e.g., 1 hour)
-    });
-  
-    // Send the token to the client
-    res.json({ token });
-  });
-
- 
-  

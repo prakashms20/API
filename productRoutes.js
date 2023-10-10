@@ -1,11 +1,24 @@
 const express = require('express');
+
+/**
+ * @swagger
+ * /product:
+ *   get:
+ *     summary: Retrieve all categories
+ *     description: Get a list of all categories.
+ *     responses:
+ *       200:
+ *         description: Successful response with a list of categories.
+ *       500:
+ *         description: Internal Server Error.
+ */
 const router = express.Router();
 
-module.exports = (pool) => {
+module.exports = (pool,authenticateJWT) => {
 
 
 
-router.post('/', async (req, res) => {
+router.post('/',authenticateJWT, async (req, res) => {
     const { Category_id, price, model } = req.body;
     try {
       const client = await pool.connect();
@@ -23,7 +36,7 @@ router.post('/', async (req, res) => {
   });
   
   
-  router.get('/', async (req, res) => {
+  router.get('/',authenticateJWT, async (req, res) => {
     try {
       const client = await pool.connect();
       const result = await client.query('SELECT * FROM product');
@@ -37,7 +50,7 @@ router.post('/', async (req, res) => {
   });
   
   
-  router.put('/:id', async (req, res) => {
+  router.put('/:id', authenticateJWT,async (req, res) => {
     const productId = req.params.id;
     const { Category_id, price, model } = req.body;
     try {
@@ -55,7 +68,7 @@ router.post('/', async (req, res) => {
   });
   
 
-  router.delete('/:id', async (req, res) => {
+  router.delete('/:id',authenticateJWT, async (req, res) => {
     const productId = req.params.id;
     try {
       const client = await pool.connect();
@@ -70,6 +83,7 @@ router.post('/', async (req, res) => {
 
   return router;
 };
+
 
 
   

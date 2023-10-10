@@ -1,9 +1,22 @@
 const express = require('express');
+
+/**
+ * @swagger
+ * /order:
+ *   get:
+ *     summary: Retrieve all categories
+ *     description: Get a list of all categories.
+ *     responses:
+ *       200:
+ *         description: Successful response with a list of categories.
+ *       500:
+ *         description: Internal Server Error.
+ */
 const router = express.Router();
 
-module.exports = (pool) => {
+module.exports = (pool,authenticateJWT) => {
 
-    router.post('/', async (req, res) => {
+    router.post('/',authenticateJWT, async (req, res) => {
         const { product_id, date, tax, amount, status } = req.body;
         try {
           const client = await pool.connect();
@@ -20,7 +33,7 @@ module.exports = (pool) => {
         }
       });
 
-      router.get('/', async (req, res) => {
+      router.get('/',authenticateJWT, async (req, res) => {
         try {
           const client = await pool.connect();
           const result = await client.query('SELECT * FROM ordertable');
@@ -35,6 +48,8 @@ module.exports = (pool) => {
 
   return router;
 };
+
+
 
 
   
