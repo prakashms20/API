@@ -4,11 +4,19 @@ const express = require('express');
  * @swagger
  * /useraccount:
  *   get:
- *     summary: Retrieve all categories
- *     description: Get a list of all categories.
+ *     summary: Retrieve all useraccount
+ *     description: Get a list of all useraccount.
  *     responses:
  *       200:
- *         description: Successful response with a list of categories.
+ *         description: Successful response with a list of useraccount.
+ *       500:
+ *         description: Internal Server Error.
+ *   post:
+ *     summary: Create a new useraccount
+ *     description: Create a new useraccount with a name, email and phone.
+ *     responses:
+ *       201:
+ *         description: product created successfully.
  *       500:
  *         description: Internal Server Error.
  */

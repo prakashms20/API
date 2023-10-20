@@ -11,6 +11,31 @@ const express = require('express');
  *         description: Successful response with a list of categories.
  *       500:
  *         description: Internal Server Error.
+ *   post:
+ *     summary: Create a new category
+ *     description: Create a new category with a name and description.
+ *     responses:
+ *       201:
+ *         description: Category created successfully.
+ *       500:
+ *         description: Internal Server Error.
+ *   put:
+ *     summary: Update a category by ID
+ *     description: Update an existing category by ID.
+ *     responses:
+ *       200:
+ *         description: Category updated successfully.
+ *       500:
+ *         description: Internal Server Error.
+ *
+ *   delete:
+ *     summary: Delete a category by ID
+ *     description: Delete an existing category by ID.
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully.
+ *       500:
+ *         description: Internal Server Error.
  */
 const router = express.Router();
 

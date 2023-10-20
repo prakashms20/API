@@ -40,6 +40,37 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * @swagger
+ * /generatetoken:
+ *   post:
+ *     summary: Generate a JWT token
+ *     description: Generate a JWT token upon successful login
+ *     parameters:
+ *       - in: body
+ *         name: credentials
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *             password:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: JWT token generated successfully
+ *         schema:
+ *           type: object
+ *           properties:
+ *             token:
+ *               type: string
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Internal Server Error
+ */
+
 // Create and send a JWT token to the user upon successful registration or login
 app.post('/generatetoken', (req, res) => {
   const { username, password } = req.body;
@@ -62,5 +93,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}`); 
 });

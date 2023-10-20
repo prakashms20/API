@@ -4,14 +4,23 @@ const express = require('express');
  * @swagger
  * /order:
  *   get:
- *     summary: Retrieve all categories
- *     description: Get a list of all categories.
+ *     summary: Retrieve all order
+ *     description: Get a list of all order.
  *     responses:
  *       200:
- *         description: Successful response with a list of categories.
+ *         description: Successful response with a list of order.
+ *       500:
+ *         description: Internal Server Error.
+ *   post:
+ *     summary: Create a new order
+ *     description: Create a new Payment with a name and order.
+ *     responses:
+ *       201:
+ *         description: order created successfully.
  *       500:
  *         description: Internal Server Error.
  */
+
 const router = express.Router();
 
 module.exports = (pool,authenticateJWT) => {

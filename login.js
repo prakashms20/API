@@ -4,14 +4,23 @@ const express = require('express');
  * @swagger
  * /login:
  *   get:
- *     summary: Retrieve all categories
- *     description: Get a list of all categories.
+ *     summary: Retrieve all login
+ *     description: Get a list of all login.
  *     responses:
  *       200:
- *         description: Successful response with a list of categories.
+ *         description: Successful response with a list of login.
+ *       500:
+ *         description: Internal Server Error.
+ *   post:
+ *     summary: Create a new login
+ *     description: Create a new Payment with a name and login.
+ *     responses:
+ *       201:
+ *         description: login created successfully.
  *       500:
  *         description: Internal Server Error.
  */
+
 const router = express.Router();
 
 module.exports = (pool,authenticateJWT) => {

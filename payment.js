@@ -2,13 +2,21 @@ const express = require('express');
 
 /**
  * @swagger
- * /payment:
+ * /Payment:
  *   get:
- *     summary: Retrieve all categories
- *     description: Get a list of all categories.
+ *     summary: Retrieve all Payment
+ *     description: Get a list of all Payment.
  *     responses:
  *       200:
- *         description: Successful response with a list of categories.
+ *         description: Successful response with a list of Payment.
+ *       500:
+ *         description: Internal Server Error.
+ *   post:
+ *     summary: Create a new product
+ *     description: Create a new Payment with a name and Payment.
+ *     responses:
+ *       201:
+ *         description: payment created successfully.
  *       500:
  *         description: Internal Server Error.
  */

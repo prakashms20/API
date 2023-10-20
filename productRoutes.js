@@ -1,14 +1,38 @@
 const express = require('express');
-
 /**
  * @swagger
  * /product:
  *   get:
- *     summary: Retrieve all categories
- *     description: Get a list of all categories.
+ *     summary: Retrieve all products
+ *     description: Get a list of all products.
  *     responses:
  *       200:
- *         description: Successful response with a list of categories.
+ *         description: Successful response with a list of products.
+ *       500:
+ *         description: Internal Server Error.
+ *   post:
+ *     summary: Create a new product
+ *     description: Create a new product with a name and products.
+ *     responses:
+ *       201:
+ *         description: product created successfully.
+ *       500:
+ *         description: Internal Server Error.
+ *   put:
+ *     summary: Update a product by ID
+ *     description: Update an existing product by ID.
+ *     responses:
+ *       200:
+ *         description: product updated successfully.
+ *       500:
+ *         description: Internal Server Error.
+ *
+ *   delete:
+ *     summary: Delete a product by ID
+ *     description: Delete an existing product by ID.
+ *     responses:
+ *       200:
+ *         description: product deleted successfully.
  *       500:
  *         description: Internal Server Error.
  */

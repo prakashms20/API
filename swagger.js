@@ -11,7 +11,7 @@ const options = {
     basePath: '/', // Base path for your API
   },
   // Replace this with the correct path to your route files
-  apis: ['./productRoutes.js', './useraccount.js', './login.js', './order.js', './payment.js'],
+  apis: ['./jwtToken.js', './useraccount.js', './login.js', './order.js', './payment.js', './productRoutes.js', './category.js'],
 };
 
 const specs = swaggerJsdoc(options);
